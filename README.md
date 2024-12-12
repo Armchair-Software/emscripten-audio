@@ -1,6 +1,6 @@
 # Emscripten-Audio
 
-A lightweight C++ library to make it easy to work with realtime [WASM audio worklets](https://emscripten.org/docs/api_reference/wasm_audio_worklets.html) under Emscripten.
+A lightweight C++ library to make it easy to work with realtime, low latency [WASM audio worklets](https://emscripten.org/docs/api_reference/wasm_audio_worklets.html) under Emscripten.
 
 ## Demos
 
