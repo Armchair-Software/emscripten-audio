@@ -4,8 +4,8 @@ A lightweight C++ library to make it easy to work with realtime [WASM audio work
 
 ## Demos
 
-Full demo for usage: https://github.com/Armchair-Software/emscripten-sound-demo
-Live demo: https://armchair-software.github.io/emscripten-sound-demo/
+- Live demo: https://armchair-software.github.io/emscripten-sound-demo/
+- Demo source code: https://github.com/Armchair-Software/emscripten-sound-demo
 
 ## Example
 
