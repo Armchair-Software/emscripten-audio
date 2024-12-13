@@ -16,7 +16,9 @@ Minimal example, logging when playback starts and creating a simple white noise 
       .playback_started{[&]{  // called when the user clicks on the window (which is needed to enable audio playback in modern browsers)
         std::cout << "Hello world, playback has started!" << std::endl;
       }},
-      .output{[&](std::span<AudioSampleFrame> outputs){
+      .processing{[&](std::span<AudioSampleFrame const> /*inputs*/,
+                      std::span<AudioSampleFrame> outputs,
+                      std::span<AudioParamFrame const > /*params*/){
         for(auto const &output : outputs) {
           for(int i{0}; i != output.samplesPerChannel; ++i) {
             for(int channel{0}; channel != output.numberOfChannels; ++channel) {
@@ -56,7 +58,7 @@ Here `interactive` will usually be the lowest available latency, and `balanced` 
 
 Number of inputs, outputs and their channels, latency hint and worklet name are fixed after initial construction.  The values of inputs and outputs and their channels can be accessed as const members `audio.inputs` and `audio.output_channels`.
 
-Callbacks can also be updated at any time after program start, by modifying `audio.callbacks.input`, `audio.callbacks.output` and `audio.callbacks.params`.  If no output callback is created but non-zero output channels exist, they will be filled with zeros to avoid inadvertently generating white noise.
+Callbacks can also be updated at any time after program start, by modifying `audio.callbacks.processing` (and `audio.callbacks.playback_started`, although you're not likely to need to).  If no processing callback is created, but non-zero output channels exist, the output will be filled with zeros to avoid inadvertently generating white noise.
 
 Getters are provided for further information:
 ```cpp  
