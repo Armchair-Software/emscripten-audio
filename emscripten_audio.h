@@ -20,9 +20,11 @@ public:
 
   struct callback_types {
     std::function<void()> playback_started{};
-    std::function<void(std::span<AudioSampleFrame const>)> input{};
-    std::function<void(std::span<AudioSampleFrame      >)> output{};
-    std::function<void(std::span<AudioParamFrame const >)> params{};
+    std::function<void(
+      std::span<AudioSampleFrame const>,                                        // inputs
+      std::span<AudioSampleFrame>,                                              // outputs
+      std::span<AudioParamFrame const >                                         // params
+    )> processing{};
   };
 
   struct construction_options {

@@ -28,6 +28,10 @@ emscripten_audio::emscripten_audio(construction_options &&options)
   assert(inputs <= std::numeric_limits<int>::max());
   assert(output_channels.size() <= std::numeric_limits<int>::max());
 
+  if(EM_ASM_INT({return window.crossOriginIsolated ? 1 : 0;}) == 0) {
+    std::cerr << "ERROR: Emscripten Audio: Not cross origin isolated - won't be able to use SharedArrayBuffer!" << std::endl;
+  }
+
   sample_rate = static_cast<unsigned int>(EM_ASM_DOUBLE({
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     var ctx = new AudioContext();
@@ -43,12 +47,12 @@ emscripten_audio::emscripten_audio(construction_options &&options)
   };
   EMSCRIPTEN_WEBAUDIO_T emscripten_audio_context{emscripten_create_audio_context(&create_audio_context_options)};
 
-  emscripten_start_wasm_audio_worklet_thread_async(
+  emscripten_start_wasm_audio_worklet_thread_async(                             // create the worklet thread
     emscripten_audio_context,
     audio_thread_stack.data(),
     audio_thread_stack.size(),
     [](EMSCRIPTEN_WEBAUDIO_T audio_context, bool success, void *user_data) {    // EmscriptenStartWebAudioWorkletCallback
-      /// Callback that runs when audio creation is complete (either success or fail)
+      /// Callback that runs when audio thread creation is complete (either success or fail)
       auto &parent{*static_cast<emscripten_audio*>(user_data)};
       if(!success) {
         std::cerr << "ERROR: Emscripten Audio: Worklet start failed for context " << audio_context << std::endl;
@@ -61,7 +65,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
         .numAudioParams{0},
         .audioParamDescriptors{nullptr},
       };
-      emscripten_create_wasm_audio_worklet_processor_async(
+      emscripten_create_wasm_audio_worklet_processor_async(                     // create a processor
         audio_context,
         &worklet_create_options,
         [](EMSCRIPTEN_WEBAUDIO_T audio_context, bool success, void *user_data) { // EmscriptenWorkletProcessorCreatedCallback
@@ -79,7 +83,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
             output_channels_int.emplace_back(static_cast<int>(channel));
           }
 
-          EmscriptenAudioWorkletNodeCreateOptions worklet_node_create_options{
+          EmscriptenAudioWorkletNodeCreateOptions worklet_node_create_options{  // create a node
             .numberOfInputs{static_cast<int>(parent.inputs)},
             .numberOfOutputs{static_cast<int>(output_channels_int.size())},
             .outputChannelCounts{output_channels_int.data()},
@@ -94,11 +98,13 @@ emscripten_audio::emscripten_audio(construction_options &&options)
                void *user_data) {
               /// Audio processing callback dispatcher
               auto &parent{*static_cast<emscripten_audio*>(user_data)};
-              if(parent.callbacks.input ) parent.callbacks.input( {inputs, static_cast<size_t>(num_inputs)});
-              if(parent.callbacks.params) parent.callbacks.params({params, static_cast<size_t>(num_params)});
-              if(parent.callbacks.output) {
-                parent.callbacks.output({outputs, static_cast<size_t>(num_outputs)});
-              } else {                                                          // if no output function is provided, output silence to avoid generating noise
+              if(parent.callbacks.processing) {
+                parent.callbacks.processing(
+                  {inputs,  static_cast<size_t>(num_inputs )},
+                  {outputs, static_cast<size_t>(num_outputs)},
+                  {params,  static_cast<size_t>(num_params )}
+                );
+              } else {                                                          // if no processing function is provided, output silence to avoid generating noise
                 for(auto &output : std::span{outputs, static_cast<size_t>(num_outputs)}) {
                   std::memset(output.data, 0, static_cast<size_t>(output.numberOfChannels) * static_cast<size_t>(output.samplesPerChannel) * sizeof(float)); // could use std::fill here but memset is reportedly faster, https://lemire.me/blog/2020/01/20/filling-large-arrays-with-zeroes-quickly-in-c/
                 }
