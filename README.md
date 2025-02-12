@@ -81,7 +81,11 @@ The playback states match up with Emscripten's `AUDIO_CONTEXT_STATE_*` macros, a
 - [Emscripten](https://emscripten.org/)
 - [magic_enum](https://github.com/Neargye/magic_enum)
 
-## For the other Emscripten utility micro-libraries, see:
-- [Emscripten Browser Clipboard](https://github.com/Armchair-Software/emscripten-browser-clipboard)
-- [Emscripten Browser Cursor](https://github.com/Armchair-Software/emscripten-browser-cursor)
-- [Emscripten Browser File](https://github.com/Armchair-Software/emscripten-browser-file)
+## Other useful libraries
+
+You may also find the following Emscripten micro-libraries useful:
+
+- [Emscripten Sync](https://github.com/Armchair-Software/emscripten-sync) - Drop-in replacement for `std::mutex`, for use with Emscripten WASM Workers without the need for `-pthread`.
+- [Emscripten Browser File Library](https://github.com/Armchair-Software/emscripten-browser-file) - allows you to transfer files using the browser upload / download interface, into memory in your C++ program.
+- [Emscripten Browser Clipboard Library](https://github.com/Armchair-Software/emscripten-browser-clipboard) - easy handling of browser copy and paste events in your C++ code.
+- [Emscripten Browser Cursor](https://github.com/Armchair-Software/emscripten-browser-cursor) - easy manipulation of browser cursors, for Emscripten applications.
