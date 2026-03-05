@@ -1,4 +1,6 @@
 #include "emscripten_audio.h"
+#include <cassert>
+#include <cstring>
 #include <iostream>
 #include <limits>
 #include <magic_enum/magic_enum.hpp>
@@ -40,9 +42,9 @@ emscripten_audio::emscripten_audio(construction_options &&options)
     return sr;
   }));
 
-  std::string const &latency_hint_str{magic_enum::enum_name(latency_hint)};
+  std::string_view const latency_hint_str{magic_enum::enum_name(latency_hint)};
   EmscriptenWebAudioCreateAttributes create_audio_context_options{
-    .latencyHint{latency_hint_str.c_str()},                                     // one of "balanced", "interactive" or "playback"
+    .latencyHint{latency_hint_str.data()},                                      // one of "balanced", "interactive" or "playback"
     .sampleRate{sample_rate},                                                   // 44100 or 48000
   };
   EMSCRIPTEN_WEBAUDIO_T emscripten_audio_context{emscripten_create_audio_context(&create_audio_context_options)};
@@ -79,7 +81,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
           std::vector<int> output_channels_int;
           output_channels_int.reserve(parent.output_channels.size());
           for(auto const &channel : parent.output_channels) {                   // convert container of channels to a vector of non-const signed ints as required by emscripten
-            assert(channel < std::numeric_limits<int>::max());
+            assert(channel <= std::numeric_limits<int>::max());
             output_channels_int.emplace_back(static_cast<int>(channel));
           }
 
