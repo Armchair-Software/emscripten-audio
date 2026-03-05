@@ -1,6 +1,9 @@
 #include "emscripten_audio.h"
+#include <cassert>
+#include <cstring>
 #include <iostream>
 #include <limits>
+#include <utility>
 #include <magic_enum/magic_enum.hpp>
 
 extern "C" {
@@ -79,7 +82,7 @@ emscripten_audio::emscripten_audio(construction_options &&options)
           std::vector<int> output_channels_int;
           output_channels_int.reserve(parent.output_channels.size());
           for(auto const &channel : parent.output_channels) {                   // convert container of channels to a vector of non-const signed ints as required by emscripten
-            assert(channel < std::numeric_limits<int>::max());
+            assert(channel <= std::numeric_limits<int>::max());
             output_channels_int.emplace_back(static_cast<int>(channel));
           }
 
