@@ -44,9 +44,9 @@ emscripten_audio::emscripten_audio(construction_options &&options)
     return sr;
   }));
 
-  std::string_view const latency_hint_str{magic_enum::enum_name(latency_hint)};
+  std::string const latency_hint_str{magic_enum::enum_name(latency_hint)};
   EmscriptenWebAudioCreateAttributes create_audio_context_options{
-    .latencyHint{latency_hint_str.data()},                                      // one of "balanced", "interactive" or "playback"
+    .latencyHint{latency_hint_str.c_str()},                                     // one of "balanced", "interactive" or "playback"
     .sampleRate{sample_rate},                                                   // 44100 or 48000
   };
   EMSCRIPTEN_WEBAUDIO_T emscripten_audio_context{emscripten_create_audio_context(&create_audio_context_options)};
