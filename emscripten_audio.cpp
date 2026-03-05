@@ -3,6 +3,8 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
+#include <string_view>
+#include <utility>
 #include <magic_enum/magic_enum.hpp>
 
 extern "C" {
